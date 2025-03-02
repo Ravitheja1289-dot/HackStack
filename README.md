@@ -18,7 +18,6 @@ GenAI-Powered Financial Assistant is an intelligent financial advisor that lever
 - **Backend:** Node.js, Express.js
 - **Database:** PostgreSQL / MongoDB
 - **AI Model:** OpenAI API / Custom LLM (Fine-tuned)
-- **Cloud Services:** Google Cloud / AWS
 - **Authentication:** Firebase Auth / OAuth 2.0
 
 ## Installation & Setup
