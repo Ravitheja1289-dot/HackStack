@@ -1,0 +1,141 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .portfolio-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .portfolio-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    text-align: center;
+  }
+  
+  .summary-card h3 {
+    margin: 0;
+    color: #555;
+  }
+  
+  .summary-card h2 {
+    margin: 10px 0;
+    font-size: 24px;
+  }
+  
+  .trend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .trend.positive {
+    color: green;
+  }
+  
+  .trend.negative {
+    color: red;
+  }
+  
+  .portfolio-allocation-chart {
+    margin-top: 20px;
+  }
+  
+  .card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .allocation-chart-wrapper {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .assets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .assets-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .assets-table th, .assets-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .right-align {
+    text-align: right;
+  }
+  
+  .actions-cell {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
