@@ -1,8 +1,12 @@
+@font-face {
+  font-family: Uber;
+  src: url('UberMove-Bold.ttf');
+}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: Uber;
 }
 
 :root {
@@ -11,7 +15,7 @@
   --dark-secondary: #272727;
   --primary-color: #6200ee;
   --accent-color: #03dac6;
-  --text-primary: #ffffff;
+  /* --text-primary: #ffffff; */
   --text-secondary: rgba(255, 255, 255, 0.7);
   --error-color: #cf6679;
   --success-color: #4caf50;

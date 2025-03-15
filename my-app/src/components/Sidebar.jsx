@@ -22,20 +22,21 @@ const Sidebar = ({ activeComponent, setActiveComponent }) => {
   ];
 
   return (
+    <>
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="logo">
           <TrendingUp size={24} />
-          <h1>FinAI</h1>
+          <h1>Quantum Fin</h1>
         </div>
       </div>
       
       <div className="menu-items">
         {menuItems.map((item) => (
           <div 
-            key={item.id}
-            className={`menu-item ${activeComponent === item.id ? 'active' : ''}`}
-            onClick={() => setActiveComponent(item.id)}
+          key={item.id}
+          className={`menu-item ${activeComponent === item.id ? 'active' : ''}`}
+          onClick={() => setActiveComponent(item.id)}
           >
             {item.icon}
             <span>{item.name}</span>
@@ -58,6 +59,8 @@ const Sidebar = ({ activeComponent, setActiveComponent }) => {
         </div>
       </div>
     </div>
+    {/* <div className="spacer"></div> */}
+    </>
   );
 };
 

@@ -1,124 +1,112 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './Chatbot.css';
-import { Send, Bot, User, HelpCircle, Mic, Image, Plus, X } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import "./Chatbot.css";
+import { Send, Bot, User } from "lucide-react";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI Financial Assistant. How can I help you today?",
-      sender: 'bot',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
+      text: "Hello! I'm your AI Assistant. How can I help you today?",
+      sender: "bot",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef(null);
-  
-  const suggestions = [
-    "How is my portfolio performing?",
-    "What stocks should I invest in?",
-    "Explain recent market trends",
-    "Generate a financial report",
-    "Analyze my spending habits"
-  ];
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // Function to send user message to Flask API
+  const handleSend = async () => {
+    if (input.trim() === "") return;
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSend = () => {
-    if (input.trim() === '') return;
-    
     // Add user message
     const userMessage = {
       id: messages.length + 1,
       text: input,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      sender: "user",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-    
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInput('');
-    setShowSuggestions(false);
-    
-    // Simulate AI typing
+
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput("");
     setIsTyping(true);
-    
-    // Simulate AI response after a delay
-    setTimeout(() => {
-      const botResponse = {
+
+    try {
+      // Send message to Flask backend
+      const response = await fetch("http://127.0.0.1:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
+
+      const data = await response.json();
+
+      // Format structured response
+      let formattedResponse = "";
+      if (typeof data.response === "object") {
+        formattedResponse = Object.entries(data.response)
+          .map(([category, items]) => (
+            `<strong>${category}</strong>:<br>` + items.map((item) => `- ${item}`).join("<br>")
+          ))
+          .join("<br><br>");
+      } else {
+        formattedResponse = data.response;
+      }
+
+      // Add bot response
+      const botMessage = {
         id: messages.length + 2,
-        text: generateResponse(input),
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: formattedResponse,
+        sender: "bot",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-      
-      setMessages(prevMessages => [...prevMessages, botResponse]);
-      setIsTyping(false);
-    }, 1500);
-  };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSend();
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: messages.length + 2,
+          text: "Error connecting to AI.",
+          sender: "bot",
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
     }
+
+    setIsTyping(false);
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setInput(suggestion);
-    setShowSuggestions(false);
-  };
-
-  const generateResponse = (query) => {
-    // In a real app, this would call an AI API
-    const responses = [
-      "Based on my analysis, your portfolio has grown by 4.2% in the last month, outperforming the S&P 500 by 1.3%. Your tech stocks are performing particularly well.",
-      "I've analyzed recent market trends and identified 3 potential stocks for your portfolio: AAPL, MSFT, and GOOGL. Would you like a detailed analysis of each?",
-      "The recent market volatility is mainly due to inflation concerns and potential interest rate changes. Let me break down how this might affect your investments.",
-      "I've generated a comprehensive financial report for your portfolio. Your asset allocation looks well-balanced, though you might consider increasing your exposure to international markets.",
-      "After analyzing your transactions, I've noticed that your spending on subscriptions has increased by 15% in the last quarter. Would you like me to suggest some potential savings?"
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+  // Scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="chatbot">
       <div className="chatbot-header">
         <div className="chatbot-title">
           <Bot size={24} />
-          <h2>AI Financial Assistant</h2>
-        </div>
-        <div className="chatbot-actions">
-          <button className="icon-button">
-            <HelpCircle size={20} />
-          </button>
+          <h2>AI Assistant</h2>
         </div>
       </div>
-      
+
       <div className="chat-container">
         <div className="messages">
           {messages.map((message) => (
-            <div 
-              key={message.id} 
-              className={`message ${message.sender === 'bot' ? 'bot' : 'user'}`}
-            >
-              <div className="message-avatar">
-                {message.sender === 'bot' ? <Bot size={18} /> : <User size={18} />}
-              </div>
+            <div key={message.id} className={`message ${message.sender === "bot" ? "bot" : "user"}`}>
+              <div className="message-avatar">{message.sender === "bot" ? <Bot size={18} /> : <User size={18} />}</div>
               <div className="message-content">
-                <div className="message-text">{message.text}</div>
+                <div
+                  className="message-text"
+                  dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, "<br>") }} // Preserve formatting
+                ></div>
                 <div className="message-timestamp">{message.timestamp}</div>
               </div>
             </div>
           ))}
-          
+
           {isTyping && (
             <div className="message bot typing">
               <div className="message-avatar">
@@ -133,44 +121,20 @@ const Chatbot = () => {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
-        
-        {showSuggestions && (
-          <div className="suggestions">
-            {suggestions.map((suggestion, index) => (
-              <div 
-                key={index} 
-                className="suggestion"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-      
+
       <div className="chat-input">
-        <button className="input-action">
-          <Plus size={20} />
-        </button>
         <input
           type="text"
-          placeholder="Ask me anything about your finances..."
+          placeholder="Ask me anything..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyPress={(e) => e.key === "Enter" && handleSend()}
         />
-        <button className="input-action">
-          <Mic size={20} />
-        </button>
-        <button 
-          className={`send-button ${input.trim() !== '' ? 'active' : ''}`}
-          onClick={handleSend}
-          disabled={input.trim() === ''}
-        >
+        <button className={`send-button ${input.trim() !== "" ? "active" : ""}`} onClick={handleSend} disabled={input.trim() === ""}>
           <Send size={20} />
         </button>
       </div>
