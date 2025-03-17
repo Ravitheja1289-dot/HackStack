@@ -1,91 +1,81 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './Dashboard.css';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
-import { 
-  Briefcase, 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertCircle, 
-  Clock, 
-  Calendar 
-} from 'lucide-react';
+import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { ShieldAlert, TrendingUp, Wallet, MessageCircle } from "lucide-react";
+import "./Dashboard.css";
 
-const API_KEY = 'VVGY1JVBQLRWCUBM';
-const Dashboard = () => {
-  const [stocks, setStocks] = useState(['AAPL', 'TSLA']);
-  const [portfolioData, setPortfolioData] = useState([]);
+const transactions = [
+  { id: 1, date: "2025-03-10", amount: -500, category: "Shopping", fraud: false },
+  { id: 2, date: "2025-03-12", amount: -100, category: "Groceries", fraud: false },
+  { id: 3, date: "2025-03-14", amount: -2000, category: "Electronics", fraud: true },
+];
 
-  const fetchStockData = async () => {
-    const promises = stocks.map(async (stock) => {
-      try {
-        const response = await axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${stock}&interval=5min&apikey=${API_KEY}`);
-        const timeSeries = response.data['Time Series (5min)'];
-        if (!timeSeries) return null;
+const spendingData = [
+  { month: "Jan", amount: 400 },
+  { month: "Feb", amount: 600 },
+  { month: "Mar", amount: 300 },
+  { month: "Apr", amount: 700 },
+];
 
-        const latestTime = Object.keys(timeSeries)[0];
-        return {
-          name: stock,
-          value: parseFloat(timeSeries[latestTime]['1. open'])
-        };
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-        return null;
-      }
-    });
-
-    const results = await Promise.all(promises);
-    setPortfolioData(results.filter(data => data !== null));
-  };
-
-  useEffect(() => {
-    fetchStockData();
-    const interval = setInterval(fetchStockData, 6000); // Refresh every minute
-    return () => clearInterval(interval);
-  }, [stocks]);
+export default function Dashboard() {
+  const [search, setSearch] = useState("");
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>Real-Time Portfolio</h1>
-        <div className="date-info">
-          <Calendar size={16} />
-          <span>{new Date().toLocaleDateString()}</span>
+      <h1 className="title">AI Financial Assistant</h1>
+      <div className="grid-container">
+        <div className="card">
+          <Wallet size={32} className="icon green" />
+          <h2>Balance: $10,500</h2>
+        </div>
+        <div className="card">
+          <TrendingUp size={32} className="icon blue" />
+          <h2>Investments: $5,000</h2>
+        </div>
+        <div className="card">
+          <ShieldAlert size={32} className="icon red" />
+          <h2>Fraud Alerts: 1</h2>
         </div>
       </div>
-
-      <div className="stock-input">
-        <input 
-          type="text" 
-          placeholder="Enter stock symbols (comma-separated)" 
-          onBlur={(e) => setStocks(e.target.value.split(',').map(s => s.trim().toUpperCase()))} 
+      <div className="chart-container">
+        <h2>Spending Analysis</h2>
+        <ResponsiveContainer width="100%" height={250}>
+          <LineChart data={spendingData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <XAxis dataKey="month" stroke="#ccc" />
+            <YAxis stroke="#ccc" />
+            <Tooltip contentStyle={{ backgroundColor: "#333", borderColor: "#555" }} />
+            <Line type="monotone" dataKey="amount" stroke="#38bdf8" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="transactions-container">
+        <h2>Transactions</h2>
+        <input
+          type="text"
+          placeholder="Search Transactions..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="search-box"
         />
-      </div>
-
-      <div className="card portfolio-chart">
-        <h3>Portfolio Performance</h3>
-        <LineChart width={600} height={300} data={portfolioData}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-          <Line type="monotone" dataKey="value" stroke="#8884d8" />
-        </LineChart>
-      </div>
-
-      <div className="card asset-allocation">
-        <h3>Asset Allocation</h3>
-        <PieChart width={250} height={250}>
-          <Pie data={portfolioData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8">
-            {portfolioData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042'][index % 4]} />
+        <ul>
+          {transactions
+            .filter((t) => t.category.toLowerCase().includes(search.toLowerCase()))
+            .map((t) => (
+              <li key={t.id} className={`transaction ${t.fraud ? "fraud" : "normal"}`}>
+                <span>{t.date}</span>
+                <span>{t.category}</span>
+                <span>${t.amount}</span>
+              </li>
             ))}
-          </Pie>
-        </PieChart>
+        </ul>
+      </div>
+      <div className="assistant">
+        <div className="assistant-info">
+          <MessageCircle size={32} className="icon yellow" />
+          <h2>AI Financial Assistant</h2>
+        </div>
+        <button className="chat-button">Chat Now</button>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}
