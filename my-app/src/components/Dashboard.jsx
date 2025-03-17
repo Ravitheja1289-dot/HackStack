@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { ShieldAlert, TrendingUp, Wallet, MessageCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { ShieldAlert, TrendingUp, Wallet, MessageCircle, Sun, Moon } from "lucide-react";
 import "./Dashboard.css";
 
 const transactions = [
@@ -16,26 +16,53 @@ const spendingData = [
   { month: "Apr", amount: 700 },
 ];
 
+const pieData = [
+  { name: "Shopping", value: 500 },
+  { name: "Groceries", value: 100 },
+  { name: "Electronics", value: 2000 },
+];
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+
 export default function Dashboard() {
   const [search, setSearch] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [investments, setInvestments] = useState(0);
+  const [fraudAlerts, setFraudAlerts] = useState(0);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setBalance(10500);
+      setInvestments(5000);
+      setFraudAlerts(transactions.filter((t) => t.fraud).length);
+    }, 500);
+  }, []);
 
   return (
-    <div className="dashboard">
-      <h1 className="title">AI Financial Assistant</h1>
+    <div className={`dashboard ${darkMode ? "dark-mode" : ""}`}>
+      <div className="header">
+        <h1 className="title">AI Financial Assistant</h1>
+        {/* <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
+          {darkMode ? <Sun size={24} /> : <Moon size={24} />}
+        </button> */}
+      </div>
+
       <div className="grid-container">
-        <div className="card1">
+        <div className="card">
           <Wallet size={32} className="icon green" />
-          <h2>Balance: $10,500</h2>
+          <h2>Balance: ${balance.toLocaleString()}</h2>
         </div>
-        <div className="card1">
+        <div className="card">
           <TrendingUp size={32} className="icon blue" />
-          <h2>Investments: $5,000</h2>
+          <h2>Investments: ${investments.toLocaleString()}</h2>
         </div>
-        <div className="card1">
+        <div className={`card ${fraudAlerts > 0 ? "alert" : ""}`}>
           <ShieldAlert size={32} className="icon red" />
-          <h2>Fraud Alerts: 1</h2>
+          <h2>Fraud Alerts: {fraudAlerts}</h2>
         </div>
       </div>
+
       <div className="chart-container">
         <h2>Spending Analysis</h2>
         <ResponsiveContainer width="100%" height={250}>
@@ -48,6 +75,21 @@ export default function Dashboard() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      <div className="pie-chart-container">
+        <h2>Expense Distribution</h2>
+        <ResponsiveContainer width="100%" height={250}>
+          <PieChart>
+            <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label>
+              {pieData.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index]} />
+              ))}
+            </Pie>
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
       <div className="transactions-container">
         <h2>Transactions</h2>
         <input
@@ -57,7 +99,6 @@ export default function Dashboard() {
           onChange={(e) => setSearch(e.target.value)}
           className="search-box"
         />
-        <div className="transaction-header">
         <ul>
           {transactions
             .filter((t) => t.category.toLowerCase().includes(search.toLowerCase()))
@@ -69,14 +110,13 @@ export default function Dashboard() {
               </li>
             ))}
         </ul>
-        </div>
       </div>
+
       <div className="assistant">
-        <div className="assistant-info">
-          <MessageCircle size={32} className="icon yellow" />
-          <h2>AI Financial Assistant</h2>
-        </div>
-        <button className="chat-button">Chat Now</button>
+        <button className="chat-button">
+          <MessageCircle size={24} className="icon yellow" />
+          Talk to Your AI Financial Assistant
+        </button>
       </div>
     </div>
   );

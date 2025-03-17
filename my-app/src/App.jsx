@@ -5,7 +5,7 @@ import Dashboard from './components/Dashboard';
 import Chatbot from './components/Chatbot';
 import Portfolio from './components/Portfolio';
 import Charts from './components/Charts';
-import './App.css';
+// import './App.css';
 
 const App = () => {
   return (
