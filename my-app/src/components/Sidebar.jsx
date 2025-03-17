@@ -1,28 +1,29 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 import { 
   BarChart2, 
   MessageSquare, 
   PieChart, 
-  BookOpen, 
-  TrendingUp,
-  User,
-  Settings,
-  LogOut,
-  ChartCandlestick 
+  ChartCandlestick, 
+  TrendingUp, 
+  User, 
+  Settings, 
+  LogOut 
 } from 'lucide-react';
 
-const Sidebar = ({ activeComponent, setActiveComponent }) => {
+const Sidebar = () => {
+  const navigate = useNavigate(); // Hook for navigation
+  const location = useLocation(); // Get the current route
+
   const menuItems = [
-    { id: 'dashboard', name: 'Dashboard', icon: <BarChart2 size={20} /> },
-    { id: 'chatbot', name: 'AI Assistant', icon: <MessageSquare size={20} /> },
-    { id: 'portfolio', name: 'Portfolio', icon: <PieChart size={20} /> },
-    { id: 'charts', name: 'Charts', icon: <ChartCandlestick size={20} /> },
-    // { id: 'stocks', name: 'Stocks', icon: <TrendingUp size={20} /> },
+    { id: 'dashboard', name: 'Dashboard', icon: <BarChart2 size={20} />, path: '/dashboard' },
+    { id: 'chatbot', name: 'AI Assistant', icon: <MessageSquare size={20} />, path: '/chatbot' },
+    { id: 'portfolio', name: 'Portfolio', icon: <PieChart size={20} />, path: '/portfolio' },
+    { id: 'charts', name: 'Charts', icon: <ChartCandlestick size={20} />, path: '/charts' },
   ];
 
   return (
-    <>
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="logo">
@@ -34,9 +35,9 @@ const Sidebar = ({ activeComponent, setActiveComponent }) => {
       <div className="menu-items">
         {menuItems.map((item) => (
           <div 
-          key={item.id}
-          className={`menu-item ${activeComponent === item.id ? 'active' : ''}`}
-          onClick={() => setActiveComponent(item.id)}
+            key={item.id}
+            className={`menu-item ${location.pathname === item.path ? 'active' : ''}`} // Apply 'active' class
+            onClick={() => navigate(item.path)} // Navigate on click
           >
             {item.icon}
             <span>{item.name}</span>
@@ -59,8 +60,6 @@ const Sidebar = ({ activeComponent, setActiveComponent }) => {
         </div>
       </div>
     </div>
-    {/* <div className="spacer"></div> */}
-    </>
   );
 };
 

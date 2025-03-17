@@ -1,40 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Chatbot from './components/Chatbot';
 import Portfolio from './components/Portfolio';
-// import Resources from './components/Resources';
-// import Stocks from './components/Stocks';
 import Charts from './components/Charts';
 import './App.css';
 
 const App = () => {
-  const [activeComponent, setActiveComponent] = useState('dashboard');
-
-  const renderComponent = () => {
-    switch(activeComponent) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'chatbot':
-        return <Chatbot />;
-      case 'portfolio':
-        return <Portfolio />;
-      case 'charts':
-        return <Charts />;
-      // case 'stocks':
-      //   return <Stocks />;
-      // default:
-        // return <Dashboard />;
-    }
-  };
-
   return (
-    <div className="app">
-      <Sidebar activeComponent={activeComponent} setActiveComponent={setActiveComponent} />
-      <div className="content">
-        {renderComponent()}
+    <Router>
+      <div className="app">
+        <Sidebar />
+        <div className="content">
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/chatbot" element={<Chatbot />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/charts" element={<Charts />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 };
 

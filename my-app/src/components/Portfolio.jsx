@@ -1,336 +1,157 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Portfolio.css';
-import { 
-  PieChart as PieIcon, 
-  BarChart, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Briefcase, 
-  Filter, 
-  Download, 
-  Plus, 
-  Edit3, 
-  Trash2 
-} from 'lucide-react';
+import { Pie } from 'recharts';
+import { PieChart, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, History, MessageCircle, DollarSign } from 'lucide-react';
 
 const Portfolio = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [showAddAsset, setShowAddAsset] = useState(false);
+  // Sample portfolio data - in a real app this would come from an API
+  const [portfolioData, setPortfolioData] = useState({
+    totalValue: 124850.75,
+    dayChange: 1250.50,
+    dayChangePercent: 1.01,
+    totalReturn: 24850.75,
+    totalReturnPercent: 24.85,
+    lastUpdated: new Date().toLocaleString(),
+  });
 
-  // Sample data
-  const portfolioAssets = [
-    { id: 1, name: 'Apple Inc.', symbol: 'AAPL', shares: 15, price: 178.72, value: 2680.80, change: 1.24, allocation: 12.5 },
-    { id: 2, name: 'Microsoft Corp.', symbol: 'MSFT', shares: 8, price: 415.50, value: 3324.00, change: 0.85, allocation: 15.5 },
-    { id: 3, name: 'Amazon.com Inc.', symbol: 'AMZN', shares: 10, price: 178.35, value: 1783.50, change: -0.76, allocation: 8.3 },
-    { id: 4, name: 'Alphabet Inc.', symbol: 'GOOGL', shares: 12, price: 147.68, value: 1772.16, change: 2.15, allocation: 8.3 },
-    { id: 5, name: 'Tesla Inc.', symbol: 'TSLA', shares: 5, price: 175.21, value: 876.05, change: -2.34, allocation: 4.1 },
-    { id: 6, name: 'Nvidia Corp.', symbol: 'NVDA', shares: 6, price: 925.63, value: 5553.78, change: 3.67, allocation: 25.8 },
-    { id: 7, name: 'Meta Platforms Inc.', symbol: 'META', shares: 7, price: 485.58, value: 3399.06, change: 1.92, allocation: 15.8 },
-    { id: 8, name: 'Netflix Inc.', symbol: 'NFLX', shares: 3, price: 625.34, value: 1876.02, change: 0.45, allocation: 8.7 },
-  ];
+  // Investment breakdown data
+  const [investmentBreakdown, setInvestmentBreakdown] = useState([
+    { name: 'Stocks', value: 62450.25, color: '#4ade80' },
+    { name: 'Crypto', value: 31250.50, color: '#3b82f6' },
+    { name: 'ETFs', value: 18750.00, color: '#a855f7' },
+    { name: 'Bonds', value: 12400.00, color: '#f97316' },
+  ]);
 
-  const totalValue = portfolioAssets.reduce((acc, asset) => acc + asset.value, 0);
+  // Transaction history
+  const [transactions, setTransactions] = useState([
+    { id: 1, type: 'BUY', asset: 'AAPL', amount: '5 shares', value: '$980.25', date: '2025-03-16', status: 'completed' },
+    { id: 2, type: 'SELL', asset: 'BTC', amount: '0.15 BTC', value: '$1,245.30', date: '2025-03-15', status: 'completed' },
+    { id: 3, type: 'BUY', asset: 'VOO', amount: '2 shares', value: '$850.00', date: '2025-03-14', status: 'completed' },
+    { id: 4, type: 'DIVIDEND', asset: 'MSFT', amount: '', value: '$32.50', date: '2025-03-13', status: 'completed' },
+    { id: 5, type: 'BUY', asset: 'ETH', amount: '1.2 ETH', value: '$3,600.00', date: '2025-03-12', status: 'completed' },
+  ]);
 
-  const calculateAllocation = (value) => {
-    return ((value / totalValue) * 100).toFixed(1);
-  };
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-  };
-
-  const renderTab = () => {
-    switch(activeTab) {
-      case 'overview':
-        return (
-          <div className="portfolio-overview">
-            <div className="portfolio-summary">
-              <div className="summary-card">
-                <h3>Total Value</h3>
-                <h2>{formatCurrency(totalValue)}</h2>
-                <p className="trend positive">
-                  <ArrowUpRight size={16} />
-                  <span>+4.2% ($902.35 today)</span>
-                </p>
-              </div>
-              
-              <div className="summary-card">
-                <h3>Day Change</h3>
-                <h2>+$902.35</h2>
-                <p className="trend positive">
-                  <ArrowUpRight size={16} />
-                  <span>+4.2%</span>
-                </p>
-              </div>
-              
-              <div className="summary-card">
-                <h3>Total Return</h3>
-                <h2>+$5,248.67</h2>
-                <p className="trend positive">
-                  <ArrowUpRight size={16} />
-                  <span>+32.3% all time</span>
-                </p>
-              </div>
-              
-              <div className="summary-card">
-                <h3>Dividend Yield</h3>
-                <h2>$486.23</h2>
-                <p>2.26% annually</p>
-              </div>
-            </div>
-            
-            <div className="portfolio-allocation-chart">
-              <div className="card">
-                <div className="card-title">
-                  <PieIcon size={18} />
-                  <h3>Asset Allocation</h3>
-                </div>
-                <div className="allocation-chart-wrapper">
-                  <div className="allocation-chart">
-                    {/* Placeholder for chart - would be implemented with recharts in real app */}
-                    <div className="chart-placeholder">
-                      <div className="donut-chart"></div>
-                    </div>
-                  </div>
-                  <div className="allocation-legend">
-                    {portfolioAssets.map((asset, index) => (
-                      <div key={asset.id} className="legend-item">
-                        <div className={`color-box color-${(index % 8) + 1}`}></div>
-                        <div className="legend-text">
-                          <span className="asset-name">{asset.symbol}</span>
-                          <span className="allocation-percent">{asset.allocation}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-        
-      case 'assets':
-        return (
-          <div className="portfolio-assets">
-            <div className="assets-header">
-              <h3>Your Assets</h3>
-              <div className="assets-actions">
-                <button className="icon-button">
-                  <Filter size={18} />
-                </button>
-                <button className="icon-button">
-                  <Download size={18} />
-                </button>
-                <button className="button add-asset" onClick={() => setShowAddAsset(true)}>
-                  <Plus size={18} />
-                  <span>Add Asset</span>
-                </button>
-              </div>
-            </div>
-            
-            <div className="assets-table-container">
-              <table className="assets-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Symbol</th>
-                    <th>Shares</th>
-                    <th className="right-align">Price</th>
-                    <th className="right-align">Value</th>
-                    <th className="right-align">Change</th>
-                    <th className="right-align">Allocation</th>
-                    <th className="actions-column">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {portfolioAssets.map((asset) => (
-                    <tr key={asset.id}>
-                      <td>{asset.name}</td>
-                      <td>{asset.symbol}</td>
-                      <td>{asset.shares}</td>
-                      <td className="right-align">{formatCurrency(asset.price)}</td>
-                      <td className="right-align">{formatCurrency(asset.value)}</td>
-                      <td className={`right-align ${asset.change >= 0 ? 'positive' : 'negative'}`}>
-                        {asset.change >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                        {asset.change}%
-                      </td>
-                      <td className="right-align">{asset.allocation}%</td>
-                      <td className="actions-cell">
-                        <button className="action-button">
-                          <Edit3 size={14} />
-                        </button>
-                        <button className="action-button">
-                          <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            {showAddAsset && (
-              <div className="modal-overlay">
-                <div className="modal">
-                  <div className="modal-header">
-                    <h3>Add New Asset</h3>
-                    <button className="close-button" onClick={() => setShowAddAsset(false)}>
-                      <X size={20} />
-                    </button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="form-group">
-                      <label>Symbol</label>
-                      <input type="text" placeholder="e.g. AAPL" />
-                    </div>
-                    <div className="form-group">
-                      <label>Shares</label>
-                      <input type="number" placeholder="Number of shares" />
-                    </div>
-                    <div className="form-group">
-                      <label>Purchase Price</label>
-                      <input type="number" placeholder="Price per share" />
-                    </div>
-                    <div className="form-group">
-                      <label>Purchase Date</label>
-                      <input type="date" />
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button className="button secondary" onClick={() => setShowAddAsset(false)}>Cancel</button>
-                    <button className="button">Add Asset</button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-        
-      case 'performance':
-        return (
-          <div className="portfolio-performance">
-            <div className="card">
-              <div className="card-title">
-                <BarChart size={18} />
-                <h3>Historical Performance</h3>
-              </div>
-              <div className="performance-chart">
-                {/* Placeholder for chart - would be implemented with recharts in real app */}
-                <div className="chart-placeholder large">
-                  <div className="line-chart"></div>
-                </div>
-              </div>
-              <div className="time-selector">
-                <button className="time-button active">1D</button>
-                <button className="time-button">1W</button>
-                <button className="time-button">1M</button>
-                <button className="time-button">3M</button>
-                <button className="time-button">1Y</button>
-                <button className="time-button">5Y</button>
-                <button className="time-button">All</button>
-              </div>
-            </div>
-            
-            <div className="performance-stats">
-              <div className="stats-card">
-                <h3>Return Metrics</h3>
-                <div className="stats-grid">
-                  <div className="stat-item">
-                    <span className="stat-label">Total Return</span>
-                    <span className="stat-value positive">+32.3%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Annual Return</span>
-                    <span className="stat-value positive">+14.8%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">1 Month Return</span>
-                    <span className="stat-value positive">+3.2%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">1 Year Return</span>
-                    <span className="stat-value positive">+18.5%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">3 Year Return</span>
-                    <span className="stat-value positive">+64.7%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Dividend Return</span>
-                    <span className="stat-value">2.26%</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="stats-card">
-                <h3>Risk Metrics</h3>
-                <div className="stats-grid">
-                  <div className="stat-item">
-                    <span className="stat-label">Volatility</span>
-                    <span className="stat-value">18.4%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Sharpe Ratio</span>
-                    <span className="stat-value">1.28</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Beta</span>
-                    <span className="stat-value">1.12</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Alpha</span>
-                    <span className="stat-value positive">+2.34%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Max Drawdown</span>
-                    <span className="stat-value negative">-15.6%</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">R-Squared</span>
-                    <span className="stat-value">0.82</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-        
-      default:
-        return <div>Overview</div>;
-    }
+  // Function to handle chatbot redirect
+  const redirectToChatbot = () => {
+    // alert('Redirecting to AI Financial Assistant Chatbot...'); 
+    window.location.href = 'http://localhost:5174/chatbot';
+    // In a real app, use window.location.href or router navigation
   };
 
   return (
-    <div className="portfolio">
-      <div className="portfolio-header">
-        <div className="portfolio-title">
-          <Briefcase size={24} />
-          <h1>My Portfolio</h1>
+    <div className="financial-portfolio">
+      <header className="portfolio-header">
+        <h1>Financial Portfolio Dashboard</h1>
+        <div className="last-updated">
+          Last updated: {portfolioData.lastUpdated}
         </div>
-        <div className="portfolio-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'assets' ? 'active' : ''}`}
-            onClick={() => setActiveTab('assets')}
-          >
-            Assets
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'performance' ? 'active' : ''}`}
-            onClick={() => setActiveTab('performance')}
-          >
-            Performance
-          </button>
+      </header>
+
+      <section className="portfolio-summary">
+        <div className="summary-card main-value">
+          <div className="card-title">
+            <DollarSign size={20} />
+            <h2>Total Portfolio Value</h2>
+          </div>
+          <div className="value-display">
+            ${portfolioData.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
         </div>
+
+        <div className="summary-card">
+          <div className="card-title">
+            <Activity size={20} />
+            <h2>Day Change</h2>
+          </div>
+          <div className={`value-display ${portfolioData.dayChange >= 0 ? 'positive' : 'negative'}`}>
+            {portfolioData.dayChange >= 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
+            ${Math.abs(portfolioData.dayChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className="percent">({portfolioData.dayChangePercent}%)</span>
+          </div>
+        </div>
+
+        <div className="summary-card">
+          <div className="card-title">
+            <TrendingUp size={20} />
+            <h2>Total Return</h2>
+          </div>
+          <div className={`value-display ${portfolioData.totalReturn >= 0 ? 'positive' : 'negative'}`}>
+            {portfolioData.totalReturn >= 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
+            ${Math.abs(portfolioData.totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className="percent">({portfolioData.totalReturnPercent}%)</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="portfolio-details">
+        <section className="investment-breakdown">
+          <h2>Investment Breakdown</h2>
+          <div className="chart-container">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={investmentBreakdown}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {investmentBreakdown.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value) => ['$' + value.toLocaleString('en-US', { minimumFractionDigits: 2 })]} 
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="breakdown-table">
+            {investmentBreakdown.map((item) => (
+              <div key={item.name} className="breakdown-item">
+                <div className="item-name">
+                  <span className="color-indicator" style={{ backgroundColor: item.color }}></span>
+                  {item.name}
+                </div>
+                <div className="item-value">${item.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="transaction-history">
+          <h2>Transaction History</h2>
+          <div className="transaction-list">
+            <div className="transaction-header">
+              <div>Type</div>
+              <div>Asset</div>
+              <div>Amount</div>
+              <div>Value</div>
+              <div>Date</div>
+            </div>
+            {transactions.map((transaction) => (
+              <div key={transaction.id} className="transaction-item">
+                <div className={`transaction-type ${transaction.type.toLowerCase()}`}>{transaction.type}</div>
+                <div className="transaction-asset">{transaction.asset}</div>
+                <div className="transaction-amount">{transaction.amount}</div>
+                <div className="transaction-value">{transaction.value}</div>
+                <div className="transaction-date">{transaction.date}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
-      
-      <div className="portfolio-content">
-        {renderTab()}
+
+      <div className="chatbot-section">
+        <button className="chatbot-button" onClick={redirectToChatbot}>
+          <MessageCircle size={20} />
+          Talk to Your AI Financial Assistant
+        </button>
       </div>
     </div>
   );
