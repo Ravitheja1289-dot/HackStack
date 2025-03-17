@@ -28,7 +28,9 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <div className="logo">
           <TrendingUp size={24} />
+          <a className="head-link" href="http://localhost:5174/dashboard">
           <h1>Quantum Fin</h1>
+          </a>
         </div>
       </div>
       
