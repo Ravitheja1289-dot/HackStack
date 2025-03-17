@@ -24,6 +24,10 @@ const pieData = [
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
+const called=()=>{
+  window.location.href = 'http://localhost:5173/chatbot';
+}
+
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [darkMode, setDarkMode] = useState(false);
@@ -113,7 +117,7 @@ export default function Dashboard() {
       </div>
 
       <div className="assistant">
-        <button className="chat-button">
+        <button className="chat-button" onClick={called}>
           <MessageCircle size={24} className="icon yellow" />
           Talk to Your AI Financial Assistant
         </button>

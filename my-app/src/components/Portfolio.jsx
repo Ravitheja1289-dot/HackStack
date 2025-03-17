@@ -35,7 +35,7 @@ const Portfolio = () => {
   // Function to handle chatbot redirect
   const redirectToChatbot = () => {
     // alert('Redirecting to AI Financial Assistant Chatbot...'); 
-    window.location.href = 'http://localhost:5174/chatbot';
+    window.location.href = 'http://localhost:5173/chatbot';
     // In a real app, use window.location.href or router navigation
   };
 
