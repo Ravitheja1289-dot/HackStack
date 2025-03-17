@@ -1,7 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* Base Styles */
 @keyframes fadeIn {
     0% { opacity: 0; }
     100% { opacity: 1; }
@@ -13,21 +10,162 @@
 
 body {
     margin: 0;
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
+    background-color: black;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-left img {
+    width: 40px;
+    height: 40px;
+}
+
+.header-left span {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: #ccc;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.github-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    background: transparent;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.github-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.login-button {
+    background-color: white;
+    color: black;
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.login-button:hover {
+    background: #ddd;
+}
+
+.signup-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.signup-button:hover {
+    background: #2563eb;
+}
+
+/* Main Content */
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 h1 {
-    font-size: 3rem; /* Adjust as needed */
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 16px;
 }
 
 p {
-    font-size: 1.25rem; /* Adjust as needed */
+    font-size: 1.25rem;
+    margin-bottom: 24px;
 }
 
-button {
-    transition: background-color 0.3s ease;
+.start-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-button:hover {
-    background-color: rgba(255, 255, 255, 0.8); /* Lighten on hover */
+.start-button:hover {
+    background: #2563eb;
+}
+
+/* Footer */
+footer {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #888;
+    font-size: 0.875rem;
+}
+
+/* Icons */
+.icon-left {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    color: white;
+}
+
+.icon-right {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    color: white;
 }
