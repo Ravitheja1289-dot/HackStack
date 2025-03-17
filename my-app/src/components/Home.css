@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 2s ease-in-out;
+}
+
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+h1 {
+    font-size: 3rem; /* Adjust as needed */
+}
+
+p {
+    font-size: 1.25rem; /* Adjust as needed */
+}
+
+button {
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: rgba(255, 255, 255, 0.8); /* Lighten on hover */
+}
