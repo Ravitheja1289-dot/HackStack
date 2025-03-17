@@ -1,6 +1,6 @@
 :root {
   --background-color: #121212;
-  --card-background: #1E1E1E;
+  --card-background: #141313;
   --text-color: #E0E0E0;
   --secondary-text-color: #B0B0B0;
   --primary-accent: #BB86FC;
@@ -95,15 +95,22 @@ body {
   margin-top: 20px;
 }
 
-.card {
+.card1 {
   background-color: var(--card-background);
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   flex: 1;
+  margin-right: 10px;
+  margin-bottom: 10px;
   min-width: 300px;
 }
-
+.grid-container
+{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 .card-title {
   display: flex;
   align-items: center;
@@ -136,6 +143,17 @@ body {
 .transaction-details {
   margin-left: 10px;
   flex-grow: 1;
+}
+.transaction-header{
+  background-color: var(--card-background);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  flex: 1;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  min-width: 300px;
+  
 }
 
 .insight-item {

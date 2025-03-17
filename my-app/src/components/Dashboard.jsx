@@ -23,15 +23,15 @@ export default function Dashboard() {
     <div className="dashboard">
       <h1 className="title">AI Financial Assistant</h1>
       <div className="grid-container">
-        <div className="card">
+        <div className="card1">
           <Wallet size={32} className="icon green" />
           <h2>Balance: $10,500</h2>
         </div>
-        <div className="card">
+        <div className="card1">
           <TrendingUp size={32} className="icon blue" />
           <h2>Investments: $5,000</h2>
         </div>
-        <div className="card">
+        <div className="card1">
           <ShieldAlert size={32} className="icon red" />
           <h2>Fraud Alerts: 1</h2>
         </div>
@@ -57,6 +57,7 @@ export default function Dashboard() {
           onChange={(e) => setSearch(e.target.value)}
           className="search-box"
         />
+        <div className="transaction-header">
         <ul>
           {transactions
             .filter((t) => t.category.toLowerCase().includes(search.toLowerCase()))
@@ -68,6 +69,7 @@ export default function Dashboard() {
               </li>
             ))}
         </ul>
+        </div>
       </div>
       <div className="assistant">
         <div className="assistant-info">
