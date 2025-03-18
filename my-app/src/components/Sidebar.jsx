@@ -18,7 +18,7 @@ const Sidebar = () => {
   const location = useLocation(); // Get the current route
 
   const menuItems = [
-    { id: 'home', name: 'Home', icon: <House size={20} />, path: '/home' },
+    // { id: 'home', name: 'Home', icon: <House size={20} />, path: '/home' },
     { id: 'dashboard', name: 'Dashboard', icon: <BarChart2 size={20} />, path: '/dashboard' },
     { id: 'chatbot', name: 'AI Assistant', icon: <MessageSquare size={20} />, path: '/chatbot' },
     { id: 'portfolio', name: 'Portfolio', icon: <PieChart size={20} />, path: '/portfolio' },
@@ -50,7 +50,8 @@ const Sidebar = () => {
       </div>
       
       <div className="sidebar-footer">
-        <div className="menu-item">
+        <div className={`menu-item ${location.pathname==='/profile' ? 'active' :''}`} 
+        onClick={() => navigate('/profile')} > {/* Navigate to settings page */}
           <User size={20} />
           <span>Profile</span>
         </div>

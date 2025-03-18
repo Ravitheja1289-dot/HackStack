@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { ShieldAlert, TrendingUp, Wallet, MessageCircle, Sun, Moon } from "lucide-react";
 import "./Dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 const transactions = [
   { id: 1, date: "2025-03-10", amount: -500, category: "Shopping", fraud: false },
@@ -24,11 +25,13 @@ const pieData = [
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
-const called=()=>{
-  window.location.href = 'http://localhost:5173/chatbot';
-}
 
+// const called=()=>{
+  //   navigate("/chatbot");
+  // }
+  
 export default function Dashboard() {
+  const navigate=useNavigate();
   const [search, setSearch] = useState("");
   const [darkMode, setDarkMode] = useState(false);
   const [balance, setBalance] = useState(0);
@@ -117,7 +120,7 @@ export default function Dashboard() {
       </div>
 
       <div className="assistant">
-        <button className="chat-button" onClick={called}>
+        <button className="chat-button" onClick={() => navigate("/chatbot")}>
           <MessageCircle size={24} className="icon yellow" />
           Talk to Your AI Financial Assistant
         </button>

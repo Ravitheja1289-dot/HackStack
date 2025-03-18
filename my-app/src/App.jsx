@@ -6,6 +6,7 @@ import Chatbot from './components/Chatbot';
 import Portfolio from './components/Portfolio';
 import Charts from './components/Charts';
 import Home from './components/Home';
+import Profile from './components/Profile';
 // import './App.css';
 
 const App = () => {
@@ -21,6 +22,8 @@ const App = () => {
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/charts" element={<Charts />} />
             <Route path="/" element={<Navigate to="/home" />} />
+            <Route path="/profile" element={<Profile/>} />
+
           </Routes>
         </div>
       </div>
