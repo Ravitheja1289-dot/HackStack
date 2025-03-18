@@ -46,7 +46,7 @@ const Home = () => {
           </div>
           
           <nav className={`desktop-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-
+           
             
             <div className="auth-buttons">
               <button className="log-in-btn">Log in</button>
