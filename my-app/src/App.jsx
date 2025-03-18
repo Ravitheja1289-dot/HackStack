@@ -23,7 +23,6 @@ const App = () => {
             <Route path="/charts" element={<Charts />} />
             <Route path="/" element={<Navigate to="/home" />} />
             <Route path="/profile" element={<Profile/>} />
-
           </Routes>
         </div>
       </div>
