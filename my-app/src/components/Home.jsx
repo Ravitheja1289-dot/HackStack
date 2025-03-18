@@ -46,49 +46,7 @@ const Home = () => {
           </div>
           
           <nav className={`desktop-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <div className="nav-links">
-              <div className="nav-item" onClick={() => toggleMenu('ui')}>
-                UI Design
-                {activeMenu === 'ui' && (
-                  <div className="dropdown-menu">
-                    <div className="dropdown-item">UX design</div>
-                    <div className="dropdown-item">Wireframing</div>
-                    <div className="dropdown-item">Programming</div>
-                    <div className="dropdown-item">Brainstorming</div>
-                    <div className="dropdown-item">Online dashboard</div>
-                    <div className="dropdown-item">Team collaboration</div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="nav-item" onClick={() => toggleMenu('design')}>
-                Design
-                {activeMenu === 'design' && (
-                  <div className="dropdown-menu">
-                    <div className="dropdown-item">Prototyping</div>
-                    <div className="dropdown-item">Development features</div>
-                    <div className="dropdown-item">Design systems</div>
-                    <div className="dropdown-item">Collaboration features</div>
-                    <div className="dropdown-item">Design process</div>
-                    <div className="dropdown-item">Tokens</div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="nav-item" onClick={() => toggleMenu('help')}>
-                Help
-                {activeMenu === 'help' && (
-                  <div className="dropdown-menu">
-                    <div className="dropdown-item">Best practices</div>
-                    <div className="dropdown-item">Plugins</div>
-                    <div className="dropdown-item">Color wheel</div>
-                    <div className="dropdown-item">Support</div>
-                    <div className="dropdown-item">Developers</div>
-                    <div className="dropdown-item">Resource library</div>
-                  </div>
-                )}
-              </div>
-            </div>
+
             
             <div className="auth-buttons">
               <button className="log-in-btn">Log in</button>
