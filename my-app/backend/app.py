@@ -1,21 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai
+from transformers import pipeline
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/chat": {"origins": "*"}})
 
-# Configure Gemini API Key
-genai.configure(api_key="AIzaSyDyFUmT8OtZdJDHzc0R1Ro-pBdJrSjIkDc")
-
-# Load the model
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Load a financial chatbot model from Hugging Face
+finance_chatbot = pipeline("text-generation", model="kanwu/ChatFinance")
 
 def format_response(response_text):
     """
-    Converts plain text responses into structured, readable formats.
+    Converts AI response into a structured format.
     """
-    # Split responses based on new lines or common delimiters
     lines = response_text.split("\n")
     structured_data = {}
 
@@ -24,8 +20,7 @@ def format_response(response_text):
         line = line.strip()
         if not line:
             continue
-        
-        # Check if line looks like a category (e.g., "**Technology:**")
+
         if line.startswith("**") and line.endswith("**:"):
             current_category = line.replace("**", "").replace(":", "").strip()
             structured_data[current_category] = []
@@ -44,13 +39,20 @@ def chat():
     if not user_input:
         return jsonify({"error": "Message is required"}), 400
 
-    # Generate AI response
-    response = model.generate_content(user_input)
+    try:
+        # Generate AI response using a finance-specific model
+        response = finance_chatbot(user_input, max_length=200, num_return_sequences=1)
+        
+        # Extract the response text
+        response_text = response[0]["generated_text"]
 
-    # Format response into structured data
-    structured_response = format_response(response.text)
+        # Format and return the response
+        structured_response = format_response(response_text)
+        return jsonify({"response": structured_response})
 
-    return jsonify({"response": structured_response})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
+    
