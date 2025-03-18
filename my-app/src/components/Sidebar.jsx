@@ -55,10 +55,6 @@ const Sidebar = () => {
           <User size={20} />
           <span>Profile</span>
         </div>
-        <div className="menu-item">
-          <Settings size={20} />
-          <span>Settings</span>
-        </div>
         <div className="menu-item logout">
           <LogOut size={20} />
           <span>Logout</span>
