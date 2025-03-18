@@ -148,7 +148,7 @@ const Profile = () => {
     <div className="profile-page">
       <div className="sidebar">
         <div className="logo">
-          <h2>Fin<span>Tech</span></h2>
+          <h2><span>Profile</span></h2>
         </div>
 
         <nav className="nav-menu">
