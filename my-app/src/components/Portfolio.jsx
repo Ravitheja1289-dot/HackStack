@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Portfolio.css';
+import { useNavigate } from "react-router-dom";
 import { Pie } from 'recharts';
 import { PieChart, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, History, MessageCircle, DollarSign } from 'lucide-react';
 
 const Portfolio = () => {
+  const navigate=useNavigate();
   // Sample portfolio data - in a real app this would come from an API
   const [portfolioData, setPortfolioData] = useState({
     totalValue: 124850.75,
@@ -35,7 +37,7 @@ const Portfolio = () => {
   // Function to handle chatbot redirect
   const redirectToChatbot = () => {
     // alert('Redirecting to AI Financial Assistant Chatbot...'); 
-    window.location.href = 'http://localhost:5173/chatbot';
+    navigate("/chatbot");
     // In a real app, use window.location.href or router navigation
   };
 
