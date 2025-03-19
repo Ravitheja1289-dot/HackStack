@@ -1,35 +1,27 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
 
 app = Flask(__name__)
 CORS(app, resources={r"/chat": {"origins": "*"}})
 
-# Load a financial chatbot model from Hugging Face
-finance_chatbot = pipeline("text-generation", model="kanwu/ChatFinance")
+# Load FinBERT model and tokenizer
+model_name = "ProsusAI/finbert"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
-def format_response(response_text):
-    """
-    Converts AI response into a structured format.
-    """
-    lines = response_text.split("\n")
-    structured_data = {}
+def analyze_sentiment(text):
+    """Analyzes sentiment of financial text using FinBERT."""
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    
+    scores = torch.nn.functional.softmax(outputs.logits, dim=-1)
+    labels = ["negative", "neutral", "positive"]
+    sentiment = labels[torch.argmax(scores)]
 
-    current_category = None
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        if line.startswith("**") and line.endswith("**:"):
-            current_category = line.replace("**", "").replace(":", "").strip()
-            structured_data[current_category] = []
-        elif current_category:
-            structured_data[current_category].append(line)
-        else:
-            structured_data.setdefault("General", []).append(line)
-
-    return structured_data
+    return sentiment, {label: score.item() for label, score in zip(labels, scores[0])}
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -40,19 +32,12 @@ def chat():
         return jsonify({"error": "Message is required"}), 400
 
     try:
-        # Generate AI response using a finance-specific model
-        response = finance_chatbot(user_input, max_length=200, num_return_sequences=1)
-        
-        # Extract the response text
-        response_text = response[0]["generated_text"]
-
-        # Format and return the response
-        structured_response = format_response(response_text)
-        return jsonify({"response": structured_response})
+        # Analyze sentiment
+        sentiment, scores = analyze_sentiment(user_input)
+        return jsonify({"sentiment": sentiment, "scores": scores})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
-    
