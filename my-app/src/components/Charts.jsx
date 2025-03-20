@@ -12,6 +12,7 @@ const Charts = () => {
       script.async = true;
       script.innerHTML = JSON.stringify({
         width: "100%",
+        
         height: "700",
         symbol: "NASDAQ:AAPL",
         interval: "D",
