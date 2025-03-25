@@ -6,11 +6,11 @@ import Dashboard from "./components/Dashboard";
 import Chatbot from "./components/Chatbot";
 import Portfolio from "./components/Portfolio";
 import Charts from "./components/Charts";
-import Home from "./components/Home";
+// import Home from "./components/Home";
 import Profile from "./components/Profile";
 import Login from "./components/Login"; // Import the new Login component
 
-const clientId = "597400534990-sorf2tm37o3hv7nn8aqfjtffm8dr24li.apps.googleusercontent.com"; // Replace with your actual Google Client ID
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID; // Replace with your actual Google Client ID
 
 const App = () => {
   const [user, setUser] = useState(null);

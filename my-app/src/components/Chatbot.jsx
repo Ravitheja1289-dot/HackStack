@@ -1,167 +1,177 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Chatbot.css';
+import { Send, Bot, User, HelpCircle, Mic, Image, Plus, X } from 'lucide-react';
 
-const GEMINI_API_KEY = AIzaSyDyFUmT8OtZdJDHzc0R1Ro-pBdJrSjIkDc  ;
-
-function Chatbot() {
-  const [messages, setMessages] = useState([]);
+const Chatbot = () => {
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: "Hello! I'm your AI Financial Assistant. How can I help you today?",
+      sender: 'bot',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ]);
   const [input, setInput] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [isCapturingImage, setIsCapturingImage] = useState(false);
-  
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
-  const mediaStreamRef = useRef(null);
-  
+
+  const suggestions = [
+    "How is my portfolio performing?",
+    "What stocks should I invest in?",
+    "Explain recent market trends",
+    "Generate a financial report",
+    "Analyze my spending habits"
+  ];
+
   useEffect(() => {
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      
-      recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
-        
-        setInput(transcript);
-      };
-      
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        setIsListening(false);
-      };
-    } else {
-      console.error('Speech recognition not supported in this browser');
-    }
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSend = async () => {
+    if (input.trim() === '') return;
     
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      }
+    const userMessage = {
+      id: messages.length + 1,
+      text: input,
+      sender: 'user',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-  }, []);
-  
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current.stop();
-    } else {
-      recognitionRef.current.start();
-    }
-    setIsListening(!isListening);
-  };
-  
-  const toggleCamera = async () => {
-    if (isCapturingImage) {
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      }
-      setIsCapturingImage(false);
-    } else {
-      try {
-        mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStreamRef.current;
-        }
-        setIsCapturingImage(true);
-      } catch (err) {
-        console.error('Error accessing camera:', err);
-        addMessage('System', 'Failed to access camera. Please check permissions.');
-      }
-    }
-  };
-  
-  const sendMessageToGemini = async (text) => {
+    
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInput('');
+    setShowSuggestions(false);
+    setIsTyping(true);
+    
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDyFUmT8OtZdJDHzc0R1Ro-pBdJrSjIkDc`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text }]
-            }
-          ]
-        })
+      const response = await fetch("http://localhost:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input })
       });
       
       const data = await response.json();
+      const botResponse = {
+        id: messages.length + 2,
+        text: data.reply,
+        sender: 'bot',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
       
-      if (data.error) {
-        throw new Error(data.error.message || 'Unknown error from Gemini API');
-      }
-      
-      return data.candidates[0].content.parts[0].text;
+      setMessages(prevMessages => [...prevMessages, botResponse]);
+      speakResponse(data.reply);
     } catch (error) {
-      console.error('Gemini API error:', error);
-      return 'Error processing message: ' + error.message;
+      console.error("Speech synthesis error:", error);
+      setMessages(prevMessages => [...prevMessages, { id: messages.length + 2, text: "⚠️ Error processing your request.", sender: 'bot', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
+    }
+    
+    setIsTyping(false);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSend();
     }
   };
-  
-  const addMessage = (sender, text) => {
-    setMessages(prevMessages => [...prevMessages, { sender, text, id: Date.now() }]);
+
+  const handleSuggestionClick = (suggestion) => {
+    setInput(suggestion);
+    setShowSuggestions(false);
   };
-  
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-    
-    const userMessage = input.trim();
-    addMessage('User', userMessage);
-    setInput('');
-    
-    try {
-      const response = await sendMessageToGemini(userMessage);
-      addMessage('Gemini', response);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      addMessage('System', 'Failed to get response. Please try again.');
+
+  const speakResponse = (text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = 'en-US';
+      speech.rate = 1.1;
+      speech.pitch = 1;
+      speech.onerror = (event) => console.error("Speech synthesis error:", event);
+      window.speechSynthesis.speak(speech);
+    } else {
+      console.warn("Speech synthesis not supported in this browser.");
     }
   };
-  
+
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Speech recognition is not supported in your browser. Try Chrome.');
+      return;
+    }
+    
+    if (!recognitionRef.current) {
+      recognitionRef.current = new window.webkitSpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+      };
+      recognitionRef.current.onerror = (event) => {
+        console.error("Speech recognition error:", event);
+      };
+    }
+    
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      recognitionRef.current.start();
+      setIsRecording(true);
+    }
+  };
+
   return (
-    <div className="app-container">
+    <div className="chatbot">
+      <div className="chatbot-header">
+        <div className="chatbot-title">
+          <Bot size={24} />
+          <h2>AI Financial Assistant</h2>
+        </div>
+        <div className="chatbot-actions">
+          <button className="icon-button">
+            <HelpCircle size={20} />
+          </button>
+        </div>
+      </div>
+      
       <div className="chat-container">
-        <div className="messages-container">
-          {messages.map(message => (
-            <div 
-              key={message.id} 
-              className={`message ${message.sender.toLowerCase()}-message`}
-            >
-              <div className="message-sender">{message.sender}</div>
-              <div className="message-text">{message.text}</div>
+        <div className="messages">
+          {messages.map((message) => (
+            <div key={message.id} className={`message ${message.sender === 'bot' ? 'bot' : 'user'}`}> 
+              <div className="message-avatar">
+                {message.sender === 'bot' ? <Bot size={18} /> : <User size={18} />}
+              </div>
+              <div className="message-content">
+                <div className="message-text">{message.text}</div>
+                <div className="message-timestamp">{message.timestamp}</div>
+              </div>
             </div>
           ))}
         </div>
-        
-        <div className="input-container">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="message-input"
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-          />
-          <div className="controls">
-            <button onClick={toggleListening} className={`control-button ${isListening ? 'active' : ''}`}>
-              {isListening ? 'Stop Listening' : 'Start Listening'}
-            </button>
-            <button onClick={handleSendMessage} className="control-button">Send</button>
-            <button onClick={toggleCamera} className={`control-button ${isCapturingImage ? 'active' : ''}`}>
-              {isCapturingImage ? 'Stop Camera' : 'Start Camera'}
-            </button>
-          </div>
-        </div>
+      </div>
+      
+      <div className="chat-input">
+        <button className="input-action">
+          <Plus size={20} />
+        </button>
+        <input type="text" placeholder="Ask me anything about your finances..." value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={handleKeyPress} />
+        <button className="input-action" onClick={handleVoiceInput}>
+          <Mic size={20} color={isRecording ? "red" : "black"} />
+        </button>
+        <button className={`send-button ${input.trim() !== '' ? 'active' : ''}`} onClick={handleSend} disabled={input.trim() === ''}>
+          <Send size={20} />
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default Chatbot;
