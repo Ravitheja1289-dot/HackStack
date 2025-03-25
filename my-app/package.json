@@ -2,6 +2,7 @@
   "name": "my-app",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://ravitheja1289-dot.github.io/HackStack",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
