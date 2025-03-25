@@ -1,5 +1,6 @@
 {
   "name": "my-app",
+    "presets": ["@babel/preset-react"],  
   "private": true,
   "version": "0.0.0",
   "homepage": "https://ravitheja1289-dot.github.io/HackStack",
@@ -10,9 +11,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d build"
-
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
@@ -30,6 +30,7 @@
     "recharts": "^2.15.1"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.26.3",
     "@eslint/js": "^9.21.0",
     "@tailwindcss/postcss": "^4.0.14",
     "@types/react": "^19.0.10",
