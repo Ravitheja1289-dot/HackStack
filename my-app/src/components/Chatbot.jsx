@@ -1,135 +1,313 @@
-import React, { useState, useRef, useEffect } from "react";
-import "./Chatbot.css";
-import { Send, Bot, User, Trash2, Mic } from "lucide-react";
+import React, { useState, useRef, useEffect } from 'react';
+import './Chatbot.css';
 
-const Chatbot = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hello! I'm your AI Financial Assistant. Ask me anything about finance!",
-      sender: "bot",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const messagesEndRef = useRef(null);
+function Chatbot() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isCapturingImage, setIsCapturingImage] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [apiKeySet, setApiKeySet] = useState(false);
+  
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const recognitionRef = useRef(null);
-
-  // Function to send user message to the backend server
-  const handleSend = async () => {
-    if (input.trim() === "") return;
-
-    const userMessage = {
-      id: messages.length + 1,
-      text: input,
-      sender: "user",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    setInput("");
-    setIsTyping(true);
-
-    try {
-      const response = await fetch("http://localhost:5000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const botMessage = {
-        id: messages.length + 2,
-        text: data.reply, // The response from the server
-        sender: "bot",
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: messages.length + 2,
-          text: "⚠️ Error connecting to the server. Please try again later.",
-          sender: "bot",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
-    }
-
-    setIsTyping(false);
-  };
-
-  // Scroll to bottom when new messages are added
+  const mediaStreamRef = useRef(null);
+  
+  // Initialize speech recognition
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        
+        setInput(transcript);
+      };
+      
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+      };
+    } else {
+      console.error('Speech recognition not supported in this browser');
+    }
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+  
+  // Function to toggle speech recognition
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start();
+    }
+    setIsListening(!isListening);
+  };
+  
+  // Function to save API key
+  const saveApiKey = () => {
+    if (geminiApiKey.trim()) {
+      setApiKeySet(true);
+      // Store the API key in localStorage
+      localStorage.setItem('AIzaSyDyFUmT8OtZdJDHzc0R1Ro-pBdJrSjIkDc', geminiApiKey);
+      addMessage('System', 'API key set successfully. You can now use the chatbot!');
+    }
+  };
+  
+  // Function to toggle camera for face recognition
+  const toggleCamera = async () => {
+    if (isCapturingImage) {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      setIsCapturingImage(false);
+    } else {
+      try {
+        mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStreamRef.current;
+        }
+        setIsCapturingImage(true);
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        addMessage('System', 'Failed to access camera. Please check permissions.');
+      }
+    }
+  };
+  
+  // Function to capture image and analyze with Gemini
+  const captureAndAnalyze = async () => {
+    if (!videoRef.current || !canvasRef.current || !apiKeySet) return;
+    
+    const context = canvasRef.current.getContext('2d');
+    canvasRef.current.width = videoRef.current.videoWidth;
+    canvasRef.current.height = videoRef.current.videoHeight;
+    
+    context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    
+    try {
+      // Convert canvas to base64 image
+      const imageBase64 = canvasRef.current.toDataURL('image/jpeg').split(',')[1];
+      
+      addMessage('User', '[Image captured for analysis]');
+      
+      // Call Gemini API for image analysis
+      const response = await analyzeImageWithGemini(imageBase64);
+      addMessage('Vision', response);
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      addMessage('System', 'Failed to analyze image. Please try again.');
+    }
+  };
+  
+  // Function to analyze image with Gemini API
+  const analyzeImageWithGemini = async (imageBase64) => {
+    try {
+      const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDG_8Lc5X4uSW50YWcT_L-aCrwOhHpLT3Q`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: "Analyze this image for face recognition. Describe what you see and detect any faces present."
+                },
+                {
+                  inline_data: {
+                    mime_type: "image/jpeg",
+                    data: imageBase64
+                  }
+                }
+              ]
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'Unknown error from Gemini API');
+      }
+      
+      return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      return 'Error analyzing image: ' + error.message;
+    }
+  };
+  
+  // Function to send text message to Gemini API
+  const sendMessageToGemini = async (text) => {
+    try {
+      const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDyFUmT8OtZdJDHzc0R1Ro-pBdJrSjIkDc", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: text
+                }
+              ]
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'Unknown error from Gemini API');
+      }
+      
+      return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      return 'Error processing message: ' + error.message;
+    }
+  };
+  
+  // Function to add message to chat
+  const addMessage = (sender, text) => {
+    setMessages(prevMessages => [...prevMessages, { sender, text, id: Date.now() }]);
+  };
+  
+  // Function to handle sending messages
+  const handleSendMessage = async () => {
+    if (!input.trim() || !apiKeySet) return;
+    
+    const userMessage = input.trim();
+    addMessage('User', userMessage);
+    setInput('');
+    
+    try {
+      const response = await sendMessageToGemini(userMessage);
+      addMessage('Gemini', response);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      addMessage('System', 'Failed to get response. Please try again.');
+    }
+  };
+  
+  // Load API key from localStorage if available
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('AIzaSyDyFUmT8OtZdJDHzc0R1Ro-pBdJrSjIkDc');
+    if (savedApiKey) {
+      setGeminiApiKey(savedApiKey);
+      setApiKeySet(true);
+      addMessage('System', 'Welcome back! Your API key has been loaded.');
+    } else {
+      addMessage('System', 'Please enter your Google Gemini API key to begin.');
+    }
+  }, []);
+  
   return (
-    <div className="chatbot">
-      <div className="chatbot-header">
-        <div className="chatbot-title">
-          <Bot size={24} />
-          <h2>Finance AI Assistant</h2>
+    <div className="app-container">
+      <h1>Gemini Chatbot</h1>
+      <h2>with Speech & Face Recognition</h2>
+      
+      {!apiKeySet ? (
+        <div className="api-key-container">
+          <input
+            type="password"
+            value={geminiApiKey}
+            onChange={(e) => setGeminiApiKey(e.target.value)}
+            placeholder="Enter your Gemini API key"
+            className="api-key-input"
+          />
+          <button onClick={saveApiKey} className="api-key-button">
+            Save API Key
+          </button>
+          <p className="api-key-note">
+            Note: Get your API key from <a href="https://ai.google.dev/" target="_blank" rel="noreferrer">Google AI Studio</a>
+          </p>
         </div>
-        <button className="clear-button" onClick={() => setMessages([messages[0]])}>
-          <Trash2 className="trash-btn" size={18} />
-        </button>
-      </div>
-      <div className="chat-container">
-        <div className="messages">
-          {messages.map((message) => (
-            <div key={message.id} className={`message ${message.sender === "bot" ? "bot" : "user"}`}>
-              <div className="message-avatar">{message.sender === "bot" ? <Bot size={18} /> : <User size={18} />}</div>
-              <div className="message-content">
-                <div className="message-text">{message.text}</div>
-                <div className="message-timestamp">{message.timestamp}</div>
+      ) : (
+        <>
+          <div className="chat-container">
+            <div className="messages-container">
+              {messages.map(message => (
+                <div 
+                  key={message.id} 
+                  className={`message ${message.sender.toLowerCase()}-message`}
+                >
+                  <div className="message-sender">{message.sender}</div>
+                  <div className="message-text">{message.text}</div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="input-container">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..."
+                className="message-input"
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <div className="controls">
+                <button 
+                  onClick={toggleListening} 
+                  className={`control-button ${isListening ? 'active' : ''}`}
+                >
+                  {isListening ? 'Stop Listening' : 'Start Listening'}
+                </button>
+                <button onClick={handleSendMessage} className="control-button">
+                  Send
+                </button>
+                <button 
+                  onClick={toggleCamera} 
+                  className={`control-button ${isCapturingImage ? 'active' : ''}`}
+                >
+                  {isCapturingImage ? 'Stop Camera' : 'Start Camera'}
+                </button>
+                {isCapturingImage && (
+                  <button onClick={captureAndAnalyze} className="control-button">
+                    Capture & Analyze
+                  </button>
+                )}
               </div>
             </div>
-          ))}
-
-          {isTyping && (
-            <div className="message bot typing">
-              <div className="message-avatar">
-                <Bot size={18} />
-              </div>
-              <div className="message-content">
-                 <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
+          </div>
+          
+          {isCapturingImage && (
+            <div className="video-container">
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                className="video-element"
+              />
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
             </div>
           )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-      <div className="chat-input">
-        <input
-          type="text"
-          placeholder="Ask me about finance..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSend()}
-        />
-        <button className={`send-button ${input.trim() !== "" ? "active" : ""}`} onClick={handleSend} disabled={input.trim() === ""}>
-          <Send size={20} />
-        </button>
-      </div>
+        </>
+      )}
     </div>
   );
-};
+}
 
 export default Chatbot;
