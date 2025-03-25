@@ -1,35 +1,26 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
-
+import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend requests
 
-# Load FinBERT model
-model_name = "ProsusAI/finbert"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
-nlp_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
+# Set your Gemini API Key
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    """Handle financial sentiment analysis."""
-    data = request.get_json()
-    user_message = data.get("message", "")
-
-    if not user_message:
-        return jsonify({"error": "Message is required"}), 400
-
     try:
-        result = nlp_pipeline(user_message)[0]
-        response = {
-            "label": result["label"],
-            "confidence": round(result["score"], 4)
-        }
-        return jsonify({"response": response})
-
+        user_input = request.json.get("message")
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(user_input)
+        return jsonify({"reply": response.text})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"reply": "⚠️ Error processing your request."}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
 
 @app.route("/login", methods=["POST"])
 def login():
