@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { googleLogout } from '@react-oauth/google';
 import './Sidebar.css';
 import { 
   BarChart2, 
@@ -9,30 +10,34 @@ import {
   TrendingUp, 
   User, 
   Settings, 
-  LogOut,
-  House
+  LogOut
 } from 'lucide-react';
 
-const Sidebar = () => {
-  const navigate = useNavigate(); // Hook for navigation
-  const location = useLocation(); // Get the current route
+const Sidebar = ({ setUser }) => { // Accept setUser as a prop
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
-    // { id: 'home', name: 'Home', icon: <House size={20} />, path: '/home' },
     { id: 'dashboard', name: 'Dashboard', icon: <BarChart2 size={20} />, path: '/dashboard' },
     { id: 'chatbot', name: 'AI Assistant', icon: <MessageSquare size={20} />, path: '/chatbot' },
     { id: 'portfolio', name: 'Portfolio', icon: <PieChart size={20} />, path: '/portfolio' },
     { id: 'charts', name: 'Charts', icon: <ChartCandlestick size={20} />, path: '/charts' },
   ];
 
+  const handleLogout = () => {
+    console.log("Logging out...");
+    googleLogout();
+    setUser(null); // Now this should work
+    localStorage.removeItem("user");
+    navigate('/'); // Redirect to login page after logout
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="logo">
           <TrendingUp size={24} />
-          {/* <a className="head-link" href="http://localhost:5174/dashboard"> */}
           <h1>Quantum Fin</h1>
-          {/* </a> */}
         </div>
       </div>
       
@@ -40,8 +45,8 @@ const Sidebar = () => {
         {menuItems.map((item) => (
           <div 
             key={item.id}
-            className={`menu-item ${location.pathname === item.path ? 'active' : ''}`} // Apply 'active' class
-            onClick={() => navigate(item.path)} // Navigate on click
+            className={`menu-item ${location.pathname === item.path ? 'active' : ''}`} 
+            onClick={() => navigate(item.path)}
           >
             {item.icon}
             <span>{item.name}</span>
@@ -50,12 +55,14 @@ const Sidebar = () => {
       </div>
       
       <div className="sidebar-footer">
-        <div className={`menu-item ${location.pathname==='/profile' ? 'active' :''}`} 
-        onClick={() => navigate('/profile')} > {/* Navigate to settings page */}
+        <div 
+          className={`menu-item ${location.pathname === '/profile' ? 'active' : ''}`} 
+          onClick={() => navigate('/profile')}
+        >
           <User size={20} />
           <span>Profile</span>
         </div>
-        <div className="menu-item logout">
+        <div className="menu-item logout" onClick={handleLogout}>
           <LogOut size={20} />
           <span>Logout</span>
         </div>

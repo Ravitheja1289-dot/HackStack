@@ -1,78 +1,54 @@
-/* Apply dark mode background */
+/* Full-screen background */
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #121212; /* Dark background */
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-  }
-  
-  /* Stylish login box */
-  .login-card {
-    background: #1e1e1e; /* Dark gray */
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.1); /* Subtle shadow */
-    text-align: center;
-    width: 350px;
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  /* Hover effect for login card */
-  .login-card:hover {
-    transform: scale(1.05);
-  }
-  
-  /* Heading styles */
-  .login-card h2 {
-    margin-bottom: 20px;
-    color: #ffffff;
-    font-size: 24px;
-    font-weight: 600;
-  }
-  
-  /* Animated underline for heading */
-  .login-card h2::after {
-    content: "";
-    display: block;
-    width: 60px;
-    height: 3px;
-    background: #00bcd4; /* Cyan accent */
-    margin: 10px auto 0;
-    border-radius: 3px;
-  }
-  
-  /* Center the Google login button */
-  .google-login-btn {
-    display: flex;
-    justify-content: center;
-    margin-top: 15px;
-  }
-  
-  /* Subtle glowing effect for login card */
-  @keyframes glow {
-    0% {
-      box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
-    }
-    50% {
-      box-shadow: 0 0 20px rgba(0, 188, 212, 0.5);
-    }
-    100% {
-      box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
-    }
-  }
-  
-  .login-card:hover {
-    animation: glow 1.5s infinite alternate;
-  }
-  
-  /* Responsive styling for smaller screens */
-  @media (max-width: 480px) {
-    .login-card {
-      width: 90%;
-      padding: 20px;
-    }
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+}
+
+/* Login box */
+.login-box {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 350px;
+}
+
+.login-box h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.login-box p {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Google button */
+.google-button {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+/* Logout button */
+.logout-button {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s ease;
+  width: 100%;
+}
+
+.logout-button:hover {
+  background: #cc0000;
+}

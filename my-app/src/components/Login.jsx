@@ -1,29 +1,51 @@
-import React from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import React, { useEffect } from "react";
+import { GoogleLogin, googleLogout } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom";
-import "./Login.css"; // Import the dark mode CSS
+import "./Login.css"; // Import CSS file
+
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID; // Load client ID
 
 const Login = ({ setUser }) => {
-  const navigate = useNavigate();
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, [setUser]);
 
-  const handleLoginSuccess = (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential);
-    setUser(decoded);
-    localStorage.setItem("user", JSON.stringify(decoded));
-    navigate("/dashboard"); // Redirect after login
+  const handleSuccess = (response) => {
+    const userProfile = jwtDecode(response.credential);
+    setUser(userProfile);
+    localStorage.setItem("user", JSON.stringify(userProfile));
+  };
+
+  const handleFailure = () => {
+    console.log("Login failed");
+  };
+
+  const handleLogout = () => {
+    googleLogout();
+    setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <h2>Welcome To Quantum Fin</h2>
-        <p style={{ color: "#b0b0b0", fontSize: "14px" }}>
-          Login securely to access your dashboard
-        </p>
-        <div className="google-login-btn">
-          <GoogleLogin onSuccess={handleLoginSuccess} onError={() => console.log("Login Failed")} />
+      <div className="login-box">
+        <h2>Welcome Back!</h2>
+        <p>Sign in with Google to continue</p>
+
+        <div className="google-button">
+          {clientId ? (
+            <GoogleLogin clientId={clientId} onSuccess={handleSuccess} onError={handleFailure} />
+          ) : (
+            <p className="error">Google Client ID is missing!</p>
+          )}
         </div>
+
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
       </div>
     </div>
   );
