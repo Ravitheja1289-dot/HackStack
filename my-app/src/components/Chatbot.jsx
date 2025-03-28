@@ -166,7 +166,7 @@ const Chatbot = () => {
           onKeyPress={handleKeyPress} 
         />
         <button className="input-action" onClick={handleVoiceInput}>
-          <Mic size={20} color={isRecording ? "red" : "black"} />
+          <Mic size={20} color={isRecording ? "red" : "white"} />
         </button>
         <button className={`send-button ${input.trim() !== '' ? 'active' : ''}`} onClick={handleSend} disabled={input.trim() === ''}>
           <Send size={20} />

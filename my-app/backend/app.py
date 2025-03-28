@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask_cors import CORS  # Import CORS
 
 # Load environment variables
-ENV_PATH = os.path.join(os.path.dirname(__file__), "VITE_GOOGLE_CLIENT_ID.env")
+ENV_PATH = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(ENV_PATH)
 
 app = Flask(__name__)
