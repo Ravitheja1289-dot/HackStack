@@ -17,7 +17,7 @@ const App = () => {
         <div className="app">
           <Sidebar />
           <div className="content">
-            {console.log("Google Client ID:", clientId)}
+            {/* {console.log("Google Client ID:", clientId)} */}
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/chatbot" element={<Chatbot />} />
