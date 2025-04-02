@@ -1,7 +1,27 @@
-import './App.css';
-import React from "react";
+import "./App.css";
+import React, { useState } from "react";
 
 const App = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  const handleLogin = async () => {
+    const apiKey = process.env.REACT_APP_API_KEY;
+    if (!apiKey) {
+      alert("API key is missing. Please check your .env file.");
+      return;
+    }
+
+    // Simulating API call (Replace with real API request)
+    if (email === "user@example.com" && password === "password123") {
+      setIsLoggedIn(true);
+      alert("Login Successful!");
+    } else {
+      alert("Invalid credentials. Try again.");
+    }
+  };
+
   return (
     <div className="home-container">
       {/* Navbar */}
@@ -23,6 +43,30 @@ const App = () => {
           <button className="signup-btn">Sign Up</button>
         </div>
       </section>
+
+      {!isLoggedIn ? (
+        <section className="login-section" id="login">
+          <h2>Login</h2>
+          <input 
+            type="email" 
+            placeholder="Enter your email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+          />
+          <input 
+            type="password" 
+            placeholder="Enter your password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+          />
+          <button onClick={handleLogin}>Login</button>
+        </section>
+      ) : (
+        <section className="welcome-section">
+          <h2>Welcome to Quantum Fin!</h2>
+          <p>You are now logged in.</p>
+        </section>
+      )}
 
       {/* About Section */}
       <section id="about" className="about-section">
